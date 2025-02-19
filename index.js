@@ -54,19 +54,3 @@ app.listen(port, ()=>{
     console.log(`My server is running on port:${port}`)
 })
 
-/* 
-git init 
-
-* crate a .env file 
-DB_USER=.....................
-DB_PASS=.................
-
-.gitignore file crate 
-
-node_modules
-.env
-.vercel
-
-
-
-*/
