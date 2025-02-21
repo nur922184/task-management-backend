@@ -35,6 +35,18 @@ async function run() {
 
 
     // এখানে কোড লিখতে হবে। 
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+
+      const query = { email: user.email }
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ massage: 'user already exists', insertedId: null })
+      }
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
+
     app.get('/users/:email', async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
@@ -81,9 +93,11 @@ async function run() {
     });
 
     // Get all tasks
-    app.get('/tasks', async (req, res) => {
-      const tasks = await tasksCollection.find().toArray();
-      res.send(tasks);
+    app.get('/tasks/:email', async (req, res) => {
+      const email = req.params.email; // Get email from URL parameter
+      const query = { email: email }; // Filter tasks by email
+      const tasks = await tasksCollection.find(query).toArray(); // Find tasks for the specific user
+      res.send(tasks); // Send the filtered tasks
     });
     // Update a task
     // app.put('/tasks/:id', async (req, res) => {
@@ -105,17 +119,17 @@ async function run() {
     app.put('/tasks/:id', async (req, res) => {
       const id = req.params.id;
       const updatedTask = req.body;
-    
+
       if (!ObjectId.isValid(id)) {
         return res.status(400).send({ message: 'Invalid Task ID' });
       }
-    
+
       // Ensure _id is not included in the update
       delete updatedTask._id;
-    
+
       const query = { _id: new ObjectId(id) };
       const updateDoc = { $set: updatedTask };
-    
+
       try {
         const result = await tasksCollection.updateOne(query, updateDoc);
         if (result.modifiedCount > 0) {
@@ -128,7 +142,7 @@ async function run() {
         res.status(500).send({ message: 'Error updating task', error });
       }
     });
-    
+
     // Delete a task
     app.delete('/tasks/:id', async (req, res) => {
       const id = req.params.id;
